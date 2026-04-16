@@ -44,7 +44,7 @@ def llm_summary_node(state: AgentState) -> AgentState:
     """Node 3: Use an LLM to synthesize a structured fleet report."""
     llm = ChatGroq(
         api_key=os.getenv("GROQ_API_KEY"),
-        model_name="llama3-8b-8192",
+        model_name="llama-3.1-8b-instant",
         temperature=0.2,
     )
 
