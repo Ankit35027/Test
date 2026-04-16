@@ -114,7 +114,7 @@ with st.sidebar:
             "sender_email": sender_email,
         }
     ):
-        st.caption("Reports will be sent automatically after analysis.")
+        st.caption("Generate the report, then click Send Report to email it.")
     else:
         st.caption("Email delivery uses backend SMTP secrets. Configure them in Streamlit secrets first.")
 
@@ -241,45 +241,6 @@ with tab2:
             "sender_email": sender_email.strip(),
         }
 
-        if recipient_email.strip():
-            if email_config_ready(email_config):
-                report_signature = build_report_signature(
-                    current_vehicle,
-                    ml_result,
-                    agent_result,
-                    recipient_email.strip(),
-                )
-                if st.session_state.get("last_emailed_signature") != report_signature:
-                    try:
-                        send_report_email(
-                            smtp_host=email_config["smtp_host"],
-                            smtp_port=email_config["smtp_port"],
-                            smtp_username=email_config["smtp_username"],
-                            smtp_password=email_config["smtp_password"],
-                            sender_email=email_config["sender_email"],
-                            recipient_email=recipient_email.strip(),
-                            subject=build_report_subject(
-                                current_vehicle.get("vehicle_id", vehicle_id),
-                                ml_result.get("risk_label", "Unknown"),
-                            ),
-                            html_body=build_report_html(current_vehicle, ml_result, agent_result),
-                        )
-                        st.session_state["last_emailed_signature"] = report_signature
-                        st.session_state["email_status"] = (
-                            "success",
-                            f"Report sent to {recipient_email.strip()}",
-                        )
-                    except Exception as exc:
-                        st.session_state["email_status"] = (
-                            "error",
-                            f"Email delivery failed: {exc}",
-                        )
-            else:
-                st.session_state["email_status"] = (
-                    "warning",
-                    "Enter SMTP host, port, username, password, and sender email to enable delivery.",
-                )
-
         st.markdown(f"### 📋 Fleet Report - Vehicle `{current_vehicle.get('vehicle_id', vehicle_id)}`")
 
         email_status = st.session_state.get("email_status")
@@ -291,6 +252,60 @@ with tab2:
                 st.warning(message)
             else:
                 st.error(message)
+
+        send_col, info_col = st.columns([1, 2])
+        with send_col:
+            send_report_btn = st.button("📨 Send Report", use_container_width=True)
+        with info_col:
+            if recipient_email.strip():
+                st.caption(f"Report recipient: {recipient_email.strip()}")
+            else:
+                st.caption("Enter a recipient email in the sidebar to enable report delivery.")
+
+        if send_report_btn:
+            if not recipient_email.strip():
+                st.session_state["email_status"] = (
+                    "warning",
+                    "Please enter a recipient email address first.",
+                )
+            elif not email_config_ready(email_config):
+                st.session_state["email_status"] = (
+                    "warning",
+                    "Email delivery is not configured. Add SMTP secrets in Streamlit first.",
+                )
+            else:
+                report_signature = build_report_signature(
+                    current_vehicle,
+                    ml_result,
+                    agent_result,
+                    recipient_email.strip(),
+                )
+                try:
+                    send_report_email(
+                        smtp_host=email_config["smtp_host"],
+                        smtp_port=email_config["smtp_port"],
+                        smtp_username=email_config["smtp_username"],
+                        smtp_password=email_config["smtp_password"],
+                        sender_email=email_config["sender_email"],
+                        recipient_email=recipient_email.strip(),
+                        subject=build_report_subject(
+                            current_vehicle.get("vehicle_id", vehicle_id),
+                            ml_result.get("risk_label", "Unknown"),
+                        ),
+                        html_body=build_report_html(current_vehicle, ml_result, agent_result),
+                    )
+                    st.session_state["last_emailed_signature"] = report_signature
+                    st.session_state["email_status"] = (
+                        "success",
+                        f"Report sent to {recipient_email.strip()}",
+                    )
+                    st.rerun()
+                except Exception as exc:
+                    st.session_state["email_status"] = (
+                        "error",
+                        f"Email delivery failed: {exc}",
+                    )
+                    st.rerun()
 
         col1, col2 = st.columns(2)
 
