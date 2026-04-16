@@ -1,7 +1,12 @@
+import hashlib
+import os
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+from dotenv import load_dotenv
+
+from utils.emailer import build_report_html, build_report_subject, send_report_email
 
 
 st.set_page_config(
@@ -10,6 +15,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+
+load_dotenv()
 
 
 def inject_css() -> None:
@@ -25,10 +33,48 @@ def load_agent():
     return fleet_agent
 
 
+def get_secret_value(name: str, default: str = "") -> str:
+    if name in st.secrets:
+        return str(st.secrets[name])
+    return os.getenv(name, default)
+
+
+def email_config_ready(config: dict) -> bool:
+    required = [
+        config.get("smtp_host"),
+        str(config.get("smtp_port", "")).strip(),
+        config.get("smtp_username"),
+        config.get("smtp_password"),
+        config.get("sender_email"),
+    ]
+    return all(bool(value) for value in required)
+
+
+def build_report_signature(vehicle_data: dict, ml_result: dict, agent_result: dict, recipient: str) -> str:
+    payload = f"{vehicle_data}|{ml_result}|{agent_result}|{recipient}"
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
 inject_css()
 
 with st.sidebar:
     st.markdown("## 🚛 Fleet AI")
+    st.markdown("---")
+    st.markdown("### 🔐 Credentials")
+
+    groq_configured = bool(get_secret_value("GROQ_API_KEY"))
+    hf_configured = bool(get_secret_value("HF_TOKEN") or get_secret_value("HUGGINGFACEHUB_API_TOKEN"))
+
+    if groq_configured:
+        st.success("Groq API key detected")
+    else:
+        st.error("Groq API key missing")
+
+    if hf_configured:
+        st.success("Hugging Face token detected")
+    else:
+        st.warning("Hugging Face token missing")
+
     st.markdown("---")
     st.markdown("### 📋 Vehicle Parameters")
 
@@ -45,6 +91,39 @@ with st.sidebar:
     maintenance_cost = st.number_input("Maintenance Cost ($)", 0, 50000, 1200)
 
     brake_condition = st.selectbox("Brake Condition", ["Good", "Fair", "Poor"])
+
+    st.markdown("---")
+    st.markdown("### ✉️ Email Delivery")
+    recipient_email = st.text_input("Recipient Email", placeholder="fleet.manager@company.com")
+    smtp_host = st.text_input(
+        "SMTP Host",
+        value=get_secret_value("SMTP_HOST"),
+        placeholder="smtp.gmail.com",
+    )
+    smtp_port = st.number_input(
+        "SMTP Port",
+        min_value=1,
+        max_value=65535,
+        value=int(get_secret_value("SMTP_PORT", "587") or 587),
+        step=1,
+    )
+    smtp_username = st.text_input(
+        "SMTP Username",
+        value=get_secret_value("SMTP_USERNAME"),
+        placeholder="notifications@company.com",
+    )
+    smtp_password = st.text_input(
+        "SMTP Password",
+        value=get_secret_value("SMTP_PASSWORD"),
+        type="password",
+    )
+    sender_email = st.text_input(
+        "Sender Email",
+        value=get_secret_value("SENDER_EMAIL"),
+        placeholder="notifications@company.com",
+    )
+
+    st.caption("If a recipient email is provided, the latest AI report is sent automatically after analysis.")
 
     st.markdown("---")
     analyze_btn = st.button("🔍 Run Full Analysis", use_container_width=True)
@@ -154,12 +233,71 @@ with tab2:
             progress.empty()
 
         st.session_state["agent_result"] = result
+        st.session_state["email_status"] = None
 
     agent_result = st.session_state.get("agent_result")
 
     if agent_result:
         current_vehicle = st.session_state.get("vehicle_data", {})
+        ml_result = st.session_state.get("ml_result", {})
+        email_config = {
+            "smtp_host": smtp_host.strip(),
+            "smtp_port": int(smtp_port),
+            "smtp_username": smtp_username.strip(),
+            "smtp_password": smtp_password,
+            "sender_email": sender_email.strip(),
+        }
+
+        if recipient_email.strip():
+            if email_config_ready(email_config):
+                report_signature = build_report_signature(
+                    current_vehicle,
+                    ml_result,
+                    agent_result,
+                    recipient_email.strip(),
+                )
+                if st.session_state.get("last_emailed_signature") != report_signature:
+                    try:
+                        send_report_email(
+                            smtp_host=email_config["smtp_host"],
+                            smtp_port=email_config["smtp_port"],
+                            smtp_username=email_config["smtp_username"],
+                            smtp_password=email_config["smtp_password"],
+                            sender_email=email_config["sender_email"],
+                            recipient_email=recipient_email.strip(),
+                            subject=build_report_subject(
+                                current_vehicle.get("vehicle_id", vehicle_id),
+                                ml_result.get("risk_label", "Unknown"),
+                            ),
+                            html_body=build_report_html(current_vehicle, ml_result, agent_result),
+                        )
+                        st.session_state["last_emailed_signature"] = report_signature
+                        st.session_state["email_status"] = (
+                            "success",
+                            f"Report sent to {recipient_email.strip()}",
+                        )
+                    except Exception as exc:
+                        st.session_state["email_status"] = (
+                            "error",
+                            f"Email delivery failed: {exc}",
+                        )
+            else:
+                st.session_state["email_status"] = (
+                    "warning",
+                    "Enter SMTP host, port, username, password, and sender email to enable delivery.",
+                )
+
         st.markdown(f"### 📋 Fleet Report - Vehicle `{current_vehicle.get('vehicle_id', vehicle_id)}`")
+
+        email_status = st.session_state.get("email_status")
+        if email_status:
+            level, message = email_status
+            if level == "success":
+                st.success(message)
+            elif level == "warning":
+                st.warning(message)
+            else:
+                st.error(message)
 
         col1, col2 = st.columns(2)
 

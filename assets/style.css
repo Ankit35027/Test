@@ -47,6 +47,16 @@ h3 {
 [data-testid="stSidebar"] {
   background: #0d1220 !important;
   border-right: 1px solid var(--border) !important;
+  min-width: 360px !important;
+  max-width: 360px !important;
+}
+
+[data-testid="collapsedControl"] {
+  display: none !important;
+}
+
+[data-testid="stSidebarContent"] {
+  padding-top: 1rem !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox label,
