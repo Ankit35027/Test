@@ -94,36 +94,29 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("### ✉️ Email Delivery")
-    recipient_email = st.text_input("Recipient Email", placeholder="fleet.manager@company.com")
-    smtp_host = st.text_input(
-        "SMTP Host",
-        value=get_secret_value("SMTP_HOST"),
-        placeholder="smtp.gmail.com",
+    recipient_email = st.text_input(
+        "Recipient Email",
+        value="ankit.2024@nst.rishihood.edu.in",
+        placeholder="fleet.manager@company.com",
     )
-    smtp_port = st.number_input(
-        "SMTP Port",
-        min_value=1,
-        max_value=65535,
-        value=int(get_secret_value("SMTP_PORT", "587") or 587),
-        step=1,
-    )
-    smtp_username = st.text_input(
-        "SMTP Username",
-        value=get_secret_value("SMTP_USERNAME"),
-        placeholder="notifications@company.com",
-    )
-    smtp_password = st.text_input(
-        "SMTP Password",
-        value=get_secret_value("SMTP_PASSWORD"),
-        type="password",
-    )
-    sender_email = st.text_input(
-        "Sender Email",
-        value=get_secret_value("SENDER_EMAIL"),
-        placeholder="notifications@company.com",
-    )
+    smtp_host = get_secret_value("SMTP_HOST")
+    smtp_port = int(get_secret_value("SMTP_PORT", "587") or 587)
+    smtp_username = get_secret_value("SMTP_USERNAME")
+    smtp_password = get_secret_value("SMTP_PASSWORD")
+    sender_email = get_secret_value("SENDER_EMAIL")
 
-    st.caption("If a recipient email is provided, the latest AI report is sent automatically after analysis.")
+    if email_config_ready(
+        {
+            "smtp_host": smtp_host,
+            "smtp_port": smtp_port,
+            "smtp_username": smtp_username,
+            "smtp_password": smtp_password,
+            "sender_email": sender_email,
+        }
+    ):
+        st.caption("Reports will be sent automatically after analysis.")
+    else:
+        st.caption("Email delivery uses backend SMTP secrets. Configure them in Streamlit secrets first.")
 
     st.markdown("---")
     analyze_btn = st.button("🔍 Run Full Analysis", use_container_width=True)
