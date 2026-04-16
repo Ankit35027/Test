@@ -1,3 +1,6 @@
+import os
+
+from dotenv import load_dotenv
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
@@ -5,12 +8,24 @@ from langchain_community.vectorstores import FAISS
 _vectorstore = None
 
 
+load_dotenv()
+
+
+def _build_embeddings() -> HuggingFaceEmbeddings:
+    token = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACEHUB_API_TOKEN")
+    model_kwargs = {"token": token} if token else {}
+    return HuggingFaceEmbeddings(
+        model_name="all-MiniLM-L6-v2",
+        model_kwargs=model_kwargs,
+    )
+
+
 def get_retriever():
     """Load the FAISS store once and reuse it across calls."""
     global _vectorstore
 
     if _vectorstore is None:
-        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        embeddings = _build_embeddings()
         _vectorstore = FAISS.load_local(
             "rag/vectorstore",
             embeddings,
