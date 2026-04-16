@@ -1,0 +1,39 @@
+ENGINE TEMPERATURE GUIDELINES
+If engine temperature exceeds 100°C, schedule immediate inspection within 24 hours.
+Temperatures between 90-100°C indicate moderate risk; plan service within 7 days.
+Normal operating temperature is below 90°C; routine check at next scheduled interval.
+
+OIL QUALITY GUIDELINES
+Oil quality score below 0.3 indicates critical degradation; replace oil immediately.
+Scores between 0.3 and 0.6 suggest moderate wear; plan oil change within 500 hours.
+Scores above 0.6 indicate acceptable oil condition; continue normal monitoring.
+
+TIRE PRESSURE GUIDELINES
+Tire pressure below 28 PSI requires immediate attention to avoid blowout risk.
+Pressure between 28-32 PSI is acceptable but should be corrected at next service.
+Optimal tire pressure is 32-36 PSI for standard fleet vehicles.
+
+BATTERY VOLTAGE GUIDELINES
+Battery voltage below 11.5V indicates failure risk; replace battery within 48 hours.
+Voltage between 11.5V and 12.2V is weak; test and monitor closely.
+Voltage above 12.4V indicates a healthy battery.
+
+BRAKE CONDITION GUIDELINES
+Poor brake condition requires immediate grounding of the vehicle until repaired.
+Fair brake condition should be serviced within 2 weeks.
+Good brake condition: inspect again at 10,000 km or 500 usage hours.
+
+VIBRATION LEVEL GUIDELINES
+Vibration level above 0.8 g may indicate suspension or drivetrain issues.
+Levels between 0.4-0.8 g should be inspected during the next scheduled service.
+Normal vibration is below 0.4 g.
+
+HIGH RISK VEHICLE PROTOCOL
+Any vehicle flagged as high maintenance risk should be reviewed by a fleet supervisor.
+Recommended action: remove from active rotation, schedule full diagnostic within 48 hours.
+Document all fault codes and maintenance history before servicing.
+
+LOW RISK VEHICLE PROTOCOL
+Vehicles with low maintenance risk should continue normal operation.
+Schedule next predictive check at 500-hour intervals or monthly, whichever comes first.
+Maintain usage logs for trend analysis.

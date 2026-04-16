@@ -1,0 +1,214 @@
+/* ── Fleet Management Dashboard CSS ── */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500&display=swap');
+
+:root {
+  --bg-dark: #0a0e1a;
+  --bg-card: #111827;
+  --bg-card-hover: #1a2235;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-amber: #f59e0b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border: rgba(59, 130, 246, 0.15);
+  --glow: rgba(59, 130, 246, 0.25);
+}
+
+.stApp {
+  background: var(--bg-dark) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+header[data-testid="stHeader"] {
+  display: none !important;
+}
+
+h1 {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 2.4rem !important;
+  font-weight: 700 !important;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.05em !important;
+}
+
+h2,
+h3 {
+  font-family: 'Rajdhani', sans-serif !important;
+  color: var(--text-primary) !important;
+  letter-spacing: 0.03em !important;
+}
+
+[data-testid="stSidebar"] {
+  background: #0d1220 !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+[data-testid="stSidebar"] .stSelectbox label,
+[data-testid="stSidebar"] .stSlider label,
+[data-testid="stSidebar"] .stNumberInput label,
+[data-testid="stSidebar"] .stTextInput label {
+  color: var(--text-secondary) !important;
+  font-size: 0.82rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+}
+
+[data-testid="stMetric"] {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  padding: 1rem 1.2rem !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-testid="stMetric"]:hover {
+  border-color: var(--accent-blue) !important;
+  box-shadow: 0 0 20px var(--glow) !important;
+}
+
+[data-testid="stMetricLabel"] {
+  color: var(--text-secondary) !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+}
+
+[data-testid="stMetricValue"] {
+  color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+}
+
+.stButton > button {
+  background: linear-gradient(135deg, #1d4ed8, #0e7490) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.05em !important;
+  padding: 0.6rem 2rem !important;
+  transition: all 0.2s ease !important;
+  width: 100%;
+}
+
+.stButton > button:hover {
+  box-shadow: 0 0 24px var(--glow) !important;
+  transform: translateY(-1px) !important;
+}
+
+.stSuccess {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  border-radius: 10px !important;
+  color: #6ee7b7 !important;
+}
+
+.stError {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  border-radius: 10px !important;
+  color: #fca5a5 !important;
+}
+
+.stWarning {
+  background: rgba(245, 158, 11, 0.1) !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  border-radius: 10px !important;
+}
+
+.stInfo {
+  background: rgba(59, 130, 246, 0.08) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 10px !important;
+  color: #93c5fd !important;
+}
+
+.stNumberInput input,
+.stTextInput input {
+  background: #1e293b !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+
+.stSelectbox > div > div {
+  background: #1e293b !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+
+.streamlit-expanderHeader {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+.stTabs [data-baseweb="tab-list"] {
+  background: transparent !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+  color: var(--text-secondary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+}
+
+.stTabs [aria-selected="true"] {
+  color: var(--accent-cyan) !important;
+  border-bottom: 2px solid var(--accent-cyan) !important;
+}
+
+.stProgress > div > div > div {
+  background: linear-gradient(90deg, #1d4ed8, #06b6d4) !important;
+  border-radius: 4px !important;
+}
+
+.stDataFrame {
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+}
+
+.report-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.risk-badge-high {
+  display: inline-block;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.risk-badge-safe {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #6ee7b7;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
