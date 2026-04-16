@@ -6,6 +6,8 @@ import joblib
 import numpy as np
 import pandas as pd
 
+from ml.rebuild_model import rebuild_model
+
 
 MODEL_PATH = Path(__file__).resolve().parent.parent / "simple_fleet_model.pkl"
 _TOOLS = None
@@ -34,7 +36,11 @@ NUMERICAL = [
 def _load_tools():
     global _TOOLS
     if _TOOLS is None:
-        _TOOLS = joblib.load(MODEL_PATH)
+        try:
+            _TOOLS = joblib.load(MODEL_PATH)
+        except Exception:
+            rebuild_model()
+            _TOOLS = joblib.load(MODEL_PATH)
     return _TOOLS
 
 
