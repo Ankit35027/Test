@@ -51,6 +51,16 @@ h3 {
   max-width: 360px !important;
 }
 
+[data-testid="stSidebar"] button[kind="header"],
+[data-testid="stSidebar"] [data-testid="baseButton-header"],
+[data-testid="stSidebar"] .st-emotion-cache-1umgz6k,
+[data-testid="stSidebar"] .st-emotion-cache-1ydp377 {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 [data-testid="collapsedControl"] {
   display: none !important;
   visibility: hidden !important;
