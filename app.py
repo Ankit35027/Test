@@ -27,19 +27,38 @@ def inject_css() -> None:
     components.html(
         """
         <script>
-        const keepSidebarOpen = () => {
+        const removeSidebarToggle = () => {
           const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
           if (!sidebar) return;
-          const isExpanded = sidebar.getAttribute('aria-expanded');
-          if (isExpanded === 'false') {
-            const toggle = window.parent.document.querySelector('[data-testid="collapsedControl"]');
-            if (toggle) {
-              toggle.click();
+          const candidates = sidebar.querySelectorAll('button');
+          candidates.forEach((button) => {
+            const label = ((button.getAttribute('aria-label') || '') + ' ' + (button.textContent || '')).toLowerCase();
+            const isHeaderToggle =
+              label.includes('collapse') ||
+              label.includes('close sidebar') ||
+              label.includes('hide sidebar') ||
+              label.includes('toggle sidebar') ||
+              (button.textContent || '').includes('«') ||
+              (button.textContent || '').includes('‹');
+            if (isHeaderToggle) {
+              button.style.display = 'none';
+              button.style.visibility = 'hidden';
+              button.style.pointerEvents = 'none';
             }
-          }
+          });
+
+          const firstButtons = sidebar.querySelectorAll(':scope > div button');
+          firstButtons.forEach((button) => {
+            const rect = button.getBoundingClientRect();
+            if (rect.top < 120) {
+              button.style.display = 'none';
+              button.style.visibility = 'hidden';
+              button.style.pointerEvents = 'none';
+            }
+          });
         };
-        keepSidebarOpen();
-        setInterval(keepSidebarOpen, 700);
+        removeSidebarToggle();
+        setInterval(removeSidebarToggle, 500);
         </script>
         """,
         height=0,
