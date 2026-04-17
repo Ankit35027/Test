@@ -53,6 +53,9 @@ h3 {
 
 [data-testid="collapsedControl"] {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 [data-testid="stSidebarContent"] {

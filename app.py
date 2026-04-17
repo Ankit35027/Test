@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 from fleet_system import run_fleet_agent
@@ -23,6 +24,27 @@ def inject_css() -> None:
     css_path = Path("assets/style.css")
     if css_path.exists():
         st.markdown(f"<style>{css_path.read_text()}</style>", unsafe_allow_html=True)
+    components.html(
+        """
+        <script>
+        const keepSidebarOpen = () => {
+          const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+          if (!sidebar) return;
+          const isExpanded = sidebar.getAttribute('aria-expanded');
+          if (isExpanded === 'false') {
+            const toggle = window.parent.document.querySelector('[data-testid="collapsedControl"]');
+            if (toggle) {
+              toggle.click();
+            }
+          }
+        };
+        keepSidebarOpen();
+        setInterval(keepSidebarOpen, 700);
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
 
 
 def get_secret_value(name: str, default: str = "") -> str:
