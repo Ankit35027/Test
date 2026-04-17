@@ -1,4 +1,3 @@
-import hashlib
 import os
 from pathlib import Path
 
@@ -6,7 +5,7 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-from utils.emailer import build_report_html, build_report_subject, send_report_email
+from fleet_system import run_fleet_agent
 
 
 st.set_page_config(
@@ -26,33 +25,14 @@ def inject_css() -> None:
         st.markdown(f"<style>{css_path.read_text()}</style>", unsafe_allow_html=True)
 
 
-@st.cache_resource
-def load_agent():
-    from agent.graph import fleet_agent
-
-    return fleet_agent
-
-
 def get_secret_value(name: str, default: str = "") -> str:
     if name in st.secrets:
         return str(st.secrets[name])
     return os.getenv(name, default)
 
-
-def email_config_ready(config: dict) -> bool:
-    required = [
-        config.get("smtp_host"),
-        str(config.get("smtp_port", "")).strip(),
-        config.get("smtp_username"),
-        config.get("smtp_password"),
-        config.get("sender_email"),
-    ]
-    return all(bool(value) for value in required)
-
-
-def build_report_signature(vehicle_data: dict, ml_result: dict, agent_result: dict, recipient: str) -> str:
-    payload = f"{vehicle_data}|{ml_result}|{agent_result}|{recipient}"
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+@st.cache_resource
+def load_fleet_system():
+    return run_fleet_agent
 
 
 inject_css()
@@ -93,32 +73,6 @@ with st.sidebar:
     brake_condition = st.selectbox("Brake Condition", ["Good", "Fair", "Poor"])
 
     st.markdown("---")
-    st.markdown("### ✉️ Email Delivery")
-    recipient_email = st.text_input(
-        "Recipient Email",
-        value="ankit.2024@nst.rishihood.edu.in",
-        placeholder="fleet.manager@company.com",
-    )
-    smtp_host = get_secret_value("SMTP_HOST")
-    smtp_port = int(get_secret_value("SMTP_PORT", "587") or 587)
-    smtp_username = get_secret_value("SMTP_USERNAME")
-    smtp_password = get_secret_value("SMTP_PASSWORD")
-    sender_email = get_secret_value("SENDER_EMAIL")
-
-    if email_config_ready(
-        {
-            "smtp_host": smtp_host,
-            "smtp_port": smtp_port,
-            "smtp_username": smtp_username,
-            "smtp_password": smtp_password,
-            "sender_email": sender_email,
-        }
-    ):
-        st.caption("Generate the report, then click Send Report to email it.")
-    else:
-        st.caption("Email delivery uses backend SMTP secrets. Configure them in Streamlit secrets first.")
-
-    st.markdown("---")
     analyze_btn = st.button("🔍 Run Full Analysis", use_container_width=True)
 
 st.markdown("# 🚛 Fleet Maintenance Intelligence")
@@ -151,7 +105,7 @@ with tab1:
         }
 
         if analyze_btn:
-            from ml.predict import predict_maintenance
+            from fleet_system import predict_maintenance
 
             with st.spinner("Running ML prediction..."):
                 ml_result = predict_maintenance(vehicle_data)
@@ -193,7 +147,7 @@ with tab2:
     should_run_agent = analyze_btn and st.session_state.get("vehicle_data")
 
     if should_run_agent:
-        agent = load_agent()
+        agent_runner = load_fleet_system()
         vehicle_data = st.session_state["vehicle_data"]
         ml_result = st.session_state.get("ml_result", {})
 
@@ -218,7 +172,7 @@ with tab2:
             status.markdown("**Step 2/3** - Retrieving maintenance guidelines (RAG)...")
             progress.progress(66)
 
-            result = agent.invoke(initial_state)
+            result = agent_runner(vehicle_data)
 
             status.markdown("**Step 3/3** - Generating AI report...")
             progress.progress(100)
@@ -226,86 +180,13 @@ with tab2:
             progress.empty()
 
         st.session_state["agent_result"] = result
-        st.session_state["email_status"] = None
 
     agent_result = st.session_state.get("agent_result")
 
     if agent_result:
         current_vehicle = st.session_state.get("vehicle_data", {})
-        ml_result = st.session_state.get("ml_result", {})
-        email_config = {
-            "smtp_host": smtp_host.strip(),
-            "smtp_port": int(smtp_port),
-            "smtp_username": smtp_username.strip(),
-            "smtp_password": smtp_password,
-            "sender_email": sender_email.strip(),
-        }
 
         st.markdown(f"### 📋 Fleet Report - Vehicle `{current_vehicle.get('vehicle_id', vehicle_id)}`")
-
-        email_status = st.session_state.get("email_status")
-        if email_status:
-            level, message = email_status
-            if level == "success":
-                st.success(message)
-            elif level == "warning":
-                st.warning(message)
-            else:
-                st.error(message)
-
-        send_col, info_col = st.columns([1, 2])
-        with send_col:
-            send_report_btn = st.button("📨 Send Report", use_container_width=True)
-        with info_col:
-            if recipient_email.strip():
-                st.caption(f"Report recipient: {recipient_email.strip()}")
-            else:
-                st.caption("Enter a recipient email in the sidebar to enable report delivery.")
-
-        if send_report_btn:
-            if not recipient_email.strip():
-                st.session_state["email_status"] = (
-                    "warning",
-                    "Please enter a recipient email address first.",
-                )
-            elif not email_config_ready(email_config):
-                st.session_state["email_status"] = (
-                    "warning",
-                    "Email delivery is not configured. Add SMTP secrets in Streamlit first.",
-                )
-            else:
-                report_signature = build_report_signature(
-                    current_vehicle,
-                    ml_result,
-                    agent_result,
-                    recipient_email.strip(),
-                )
-                try:
-                    send_report_email(
-                        smtp_host=email_config["smtp_host"],
-                        smtp_port=email_config["smtp_port"],
-                        smtp_username=email_config["smtp_username"],
-                        smtp_password=email_config["smtp_password"],
-                        sender_email=email_config["sender_email"],
-                        recipient_email=recipient_email.strip(),
-                        subject=build_report_subject(
-                            current_vehicle.get("vehicle_id", vehicle_id),
-                            ml_result.get("risk_label", "Unknown"),
-                        ),
-                        html_body=build_report_html(current_vehicle, ml_result, agent_result),
-                    )
-                    st.session_state["last_emailed_signature"] = report_signature
-                    st.session_state["email_status"] = (
-                        "success",
-                        f"Report sent to {recipient_email.strip()}",
-                    )
-                    st.rerun()
-                except Exception as exc:
-                    st.session_state["email_status"] = (
-                        "error",
-                        f"Email delivery failed: {exc}",
-                    )
-                    st.rerun()
 
         col1, col2 = st.columns(2)
 
