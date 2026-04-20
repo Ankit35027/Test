@@ -5,7 +5,7 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-Community_Cloud-FF4B4B)
 ![LangGraph](https://img.shields.io/badge/LangGraph-Agentic_AI-green)
 
-## 📖 Project Overview
+## Project Overview
 Fleet AI is an end-to-end AI system designed to transition large transportation fleets from reactive repair cycles to an intelligent, predictive, and prescriptive maintenance approach. This system progresses from classical machine learning to a fully agentic AI workflow.
 
 ### Live Application
@@ -13,7 +13,7 @@ Fleet AI is an end-to-end AI system designed to transition large transportation 
 
 ---
 
-## ⚙️ Key Milestones
+## Key Milestones
 
 ### Milestone 1: ML-Based Maintenance Prediction
 * **Dataset:** 40,000 historical vehicle telemetry records.
@@ -29,7 +29,7 @@ An agentic architecture built on LangGraph that reasons autonomously over the ML
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 * **Machine Learning:** Logistic Regression (scikit-learn)
 * **Agent Framework:** LangGraph
 * **RAG / Vector Store:** FAISS + Sentence Transformers (Hugging Face)
@@ -39,7 +39,7 @@ An agentic architecture built on LangGraph that reasons autonomously over the ML
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 ```text
 ├── app.py               # Streamlit UI, tab layout, sidebar, and session state
 ├── fleet_system.py      # ML prediction, LangGraph agent, RAG retrieval, and LLM node
