@@ -1,4 +1,4 @@
-# 🚗 Fleet AI: Agentic Vehicle Maintenance System
+# Fleet AI: Agentic Vehicle Maintenance System
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-Latest-orange)
@@ -8,7 +8,7 @@
 ## 📖 Project Overview
 Fleet AI is an end-to-end AI system designed to transition large transportation fleets from reactive repair cycles to an intelligent, predictive, and prescriptive maintenance approach. This system progresses from classical machine learning to a fully agentic AI workflow.
 
-### 🚀 Live Application
+### Live Application
 **[Access the Live Streamlit App Here](https://g5oezmn7242npcppaw9vsm.streamlit.app/)**
 
 ---
